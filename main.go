@@ -39,6 +39,8 @@ func main() {
 			server.File.Close()
 		}
 
+		log.Printf("Received %v message across %v connections", server.MessageCount, server.ConnectionCount)
+
 		return nil
 	}
 

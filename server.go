@@ -2,14 +2,17 @@ package main
 
 import (
 	"log"
+	"math"
 	"os"
 
 	"github.com/timberio/tcp_server"
 )
 
 type Server struct {
-	server *tcp_server.Server
-	File   *os.File
+	server          *tcp_server.Server
+	ConnectionCount int64
+	MessageCount    int64
+	File            *os.File
 }
 
 func (s *Server) Listen() {
@@ -19,7 +22,7 @@ func (s *Server) Listen() {
 func NewServer(address string, filePath string) *Server {
 	internal_server := tcp_server.New(address)
 
-	server := &Server{server: internal_server}
+	server := &Server{server: internal_server, ConnectionCount: 0, MessageCount: 0}
 
 	if filePath != "" {
 		log.Printf("Ensuring file %v is deleted", filePath)
@@ -38,14 +41,21 @@ func NewServer(address string, filePath string) *Server {
 
 	internal_server.OnNewClient(func(c *tcp_server.Client) {
 		log.Print("New connection established")
+		server.ConnectionCount++
 	})
 
 	internal_server.OnNewMessage(func(c *tcp_server.Client, message string) {
+		server.MessageCount++
+
 		if server.File != nil {
 			_, err := server.File.WriteString(message)
 			if err != nil {
 				log.Fatal(err)
 			}
+		}
+
+		if math.Mod(float64(server.MessageCount), 1000) == 0 {
+			log.Printf("Received %v messages", server.MessageCount)
 		}
 	})
 
