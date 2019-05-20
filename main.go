@@ -21,7 +21,6 @@ func main() {
 				cli.StringFlag{
 					Name:  "file, f",
 					Usage: "A file to write messages to",
-					Value: "end",
 				},
 			},
 			Action: func(ctx *cli.Context) error {
