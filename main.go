@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
@@ -35,6 +36,11 @@ func main() {
 				file := ctx.String("file")
 				server := NewServer(addr, file)
 				server.Listen()
+
+				if server.File != nil {
+					log.Println("Closing file")
+					server.File.Close()
+				}
 
 				return nil
 			},
