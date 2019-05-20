@@ -13,6 +13,10 @@ func main() {
 	app.Usage = "Simple TCP server that is useful for testing purposes."
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:  "address, a",
+			Usage: "The address to bind to",
+		},
+		cli.StringFlag{
 			Name:  "file, f",
 			Usage: "A file to write messages to",
 		},
