@@ -19,7 +19,6 @@ func main() {
 		cli.StringFlag{
 			Name:  "file, f",
 			Usage: "A file to write messages to",
-			Value: "/tmp/tcp_test_server_output",
 		},
 	}
 	app.Action = func(ctx *cli.Context) error {
