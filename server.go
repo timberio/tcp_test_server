@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"strings"
 
 	"github.com/timberio/tcp_server"
 )
@@ -37,17 +36,10 @@ func NewServer(address string, filePath string) *Server {
 	})
 
 	internal_server.OnNewMessage(func(c *tcp_server.Client, message string) {
-		message = strings.TrimSpace(message)
-
-		if message == server.TerminationMessage {
-			server.TerminationCount = server.TerminationCount - 1
-			log.Printf("Termination message received, count remaining: %v", server.TerminationCount)
-
-			c.Close()
-
-			if server.TerminationCount == 0 {
-				log.Print("Termination count met, exiting...")
-				os.Exit(0)
+		if server.File != nil {
+			_, err := server.File.WriteString(message)
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 	})
