@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"math"
 	"os"
+	"time"
 
 	"github.com/timberio/tcp_server"
 )
@@ -46,7 +46,6 @@ func NewServer(address string, filePath string) *Server {
 			select {
 			case <-ticker.C:
 				log.Printf("Received %v messages across %v connections", server.MessageCount, server.ConnectionCount)
-				// do stuff
 			case <-quit:
 				ticker.Stop()
 				return
