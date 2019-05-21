@@ -41,21 +41,6 @@ func NewServer(address string, filePath string) *Server {
 		server.File = f
 	}
 
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
-	go func(server *Server) {
-		for {
-			select {
-			case <-ticker.C:
-				log.Printf("Received %v messages across %v connections", server.MessageCount, server.ConnectionCount)
-				log.Printf("Sample: %s", server.SampleMessage)
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}(server)
-
 	internal_server.OnNewClient(func(c *tcp_server.Client) {
 		log.Print("New connection established")
 		server.ConnectionCount++
@@ -80,6 +65,21 @@ func NewServer(address string, filePath string) *Server {
 	internal_server.OnClientConnectionClosed(func(c *tcp_server.Client, err error) {
 		log.Print("Connection lost")
 	})
+
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func(server *Server) {
+		for {
+			select {
+			case <-ticker.C:
+				log.Printf("Received %v messages across %v connections", server.MessageCount, server.ConnectionCount)
+				log.Printf("Sample: %s", server.SampleMessage)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}(server)
 
 	return server
 }
