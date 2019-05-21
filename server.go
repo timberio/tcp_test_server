@@ -68,7 +68,7 @@ func NewServer(address string, filePath string) *Server {
 
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
-	go func(server *Server) {
+	go func() {
 		for {
 			select {
 			case <-ticker.C:
@@ -79,7 +79,7 @@ func NewServer(address string, filePath string) *Server {
 				return
 			}
 		}
-	}(server)
+	}()
 
 	return server
 }
