@@ -54,7 +54,7 @@ func NewServer(address string, filePath string) *Server {
 			}
 		}
 
-		if math.Mod(float64(server.MessageCount), 1000) == 0 {
+		if math.Mod(float64(server.MessageCount), 5000) == 0 {
 			log.Printf("Received %v messages", server.MessageCount)
 		}
 	})
