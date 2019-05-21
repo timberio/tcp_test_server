@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"os"
 	"time"
 
@@ -13,6 +14,7 @@ type Server struct {
 	ConnectionCount int64
 	MessageCount    int64
 	File            *os.File
+	SampleMessage   string
 }
 
 func (s *Server) Listen() {
@@ -46,6 +48,7 @@ func NewServer(address string, filePath string) *Server {
 			select {
 			case <-ticker.C:
 				log.Printf("Received %v messages across %v connections", server.MessageCount, server.ConnectionCount)
+				log.Printf("Sample: %s", server.SampleMessage)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -66,6 +69,10 @@ func NewServer(address string, filePath string) *Server {
 			if err != nil {
 				log.Fatal(err)
 			}
+		}
+
+		if math.Mod(float64(server.MessageCount), 5000) == 0 {
+			server.SampleMessage = message
 		}
 	})
 
