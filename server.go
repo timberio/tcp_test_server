@@ -57,7 +57,6 @@ func NewServer(address string, filePath string) *Server {
 		}
 
 		if math.Mod(float64(server.MessageCount), 5000) == 0 {
-			log.Printf("Sample: %s", message)
 			server.SampleMessage = message
 		}
 	})
