@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -16,10 +18,6 @@ func main() {
 			Name:  "address, a",
 			Usage: "The address to bind to",
 		},
-		cli.StringFlag{
-			Name:  "file, f",
-			Usage: "A file to write messages to",
-		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 		addr := ctx.String("address")
@@ -30,16 +28,21 @@ func main() {
 			return cli.NewExitError(message, 65)
 		}
 
-		file := ctx.String("file")
-		server := NewServer(addr, file)
+		server := NewServer(addr)
+
+		var gracefulStop = make(chan os.Signal)
+		signal.Notify(gracefulStop, syscall.SIGTERM)
+		signal.Notify(gracefulStop, syscall.SIGINT)
+
+		go func() {
+			sig := <-gracefulStop
+			log.Printf("Caught sig: %+v", sig)
+			server.WriteSummary()
+			log.Println("Server stopped")
+			os.Exit(0)
+		}()
+
 		server.Listen()
-
-		if server.File != nil {
-			log.Println("Closing file")
-			server.File.Close()
-		}
-
-		log.Printf("Received %v message across %v connections", server.MessageCount, server.ConnectionCount)
 
 		return nil
 	}
