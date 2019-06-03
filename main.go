@@ -1,10 +1,7 @@
 package main
 
 import (
-	"log"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -29,18 +26,6 @@ func main() {
 		}
 
 		server := NewServer(addr)
-
-		var gracefulStop = make(chan os.Signal)
-		signal.Notify(gracefulStop, syscall.SIGTERM)
-		signal.Notify(gracefulStop, syscall.SIGINT)
-
-		go func() {
-			sig := <-gracefulStop
-			log.Printf("Caught sig: %+v", sig)
-			server.WriteSummary()
-			log.Println("Server stopped")
-			os.Exit(0)
-		}()
 
 		server.Listen()
 

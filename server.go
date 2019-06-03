@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/timberio/tcp_server"
@@ -21,6 +24,38 @@ type Server struct {
 }
 
 func (s *Server) Listen() {
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+
+	go func() {
+		sig := <-gracefulStop
+		log.Printf("Caught sig: %+v", sig)
+		s.WriteSummary()
+		log.Println("Server stopped")
+		os.Exit(0)
+	}()
+
+	// Print debug output on an interval. This helps with providing insight
+	// into activity without saturating IO.
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				log.Printf("Received %v messages across %v connections", s.MessageCount, s.ConnectionCount)
+
+				if s.sampleMessage != "" {
+					log.Printf("Sample: %s", s.sampleMessage)
+				}
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
 	s.server.Listen()
 }
 
@@ -67,26 +102,6 @@ func NewServer(address string) *Server {
 	internal_server.OnClientConnectionClosed(func(c *tcp_server.Client, err error) {
 		log.Print("Connection lost")
 	})
-
-	// Print debug output on an interval. This helps with providing insight
-	// into activity without saturating IO.
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				log.Printf("Received %v messages across %v connections", server.MessageCount, server.ConnectionCount)
-
-				if server.sampleMessage != "" {
-					log.Printf("Sample: %s", server.sampleMessage)
-				}
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
 
 	return server
 }
