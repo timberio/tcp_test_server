@@ -13,6 +13,8 @@ import (
 	"github.com/timberio/tcp_server"
 )
 
+var summaryPath = "/tmp/tcp_test_server_summary.json"
+
 type Server struct {
 	server          *tcp_server.Server
 	ConnectionCount int64  `json:"connection_count"`
@@ -65,17 +67,17 @@ func (s *Server) WriteSummary() {
 		log.Fatal(err)
 	}
 
-	filePath := "/tmp/tcp_test_server_summary.json"
-
-	err = ioutil.WriteFile(filePath, sBytes, 0644)
+	err = ioutil.WriteFile(summaryPath, sBytes, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Wrote activity summary to %s", filePath)
+	log.Printf("Wrote activity summary to %s", summaryPath)
 }
 
 func NewServer(address string) *Server {
+	os.Remove(summaryPath)
+
 	internal_server := tcp_server.New(address)
 
 	server := &Server{server: internal_server, ConnectionCount: 0, MessageCount: 0, sampleCadence: 5000.0}
